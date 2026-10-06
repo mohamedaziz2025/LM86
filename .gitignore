@@ -1,0 +1,7 @@
+node_modules/
+.DS_Store
+.env
+.env.production
+data/admin.json
+data/sessions/
+data/session-secret.txt

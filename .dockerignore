@@ -1,0 +1,8 @@
+node_modules
+.env
+.env.production
+data/admin.json
+data/sessions
+data/session-secret.txt
+.git
+*.log

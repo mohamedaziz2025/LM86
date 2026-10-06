@@ -1,0 +1,159 @@
+:root{
+  --nuit:#0B1B3A;
+  --bleu:#2B8FF5;
+  --jaune:#F5A623;
+  --clair:#F5F8FC;
+  --texte:#16233D;
+  --gris:#64748B;
+  --gris-clair:#E4EBF3;
+  --r:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--clair);color:var(--texte);
+  font:400 15px/1.55 "Plus Jakarta Sans",system-ui,sans-serif}
+a{color:inherit}
+
+/* ---------- ecran de connexion ---------- */
+.page-connexion{min-height:100vh;display:grid;place-items:center;padding:24px;
+  background:linear-gradient(160deg,#0D2149 0%,#0B1B3A 45%,#071229 100%)}
+.carte-connexion{background:#fff;border-radius:20px;padding:40px 36px;width:100%;max-width:380px;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.5)}
+.logo-connexion{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.logo-connexion .nom{font-size:20px;font-weight:800;color:var(--nuit)}
+.logo-connexion .sous{display:block;font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--bleu)}
+.champ-groupe{margin-bottom:16px}
+.champ-groupe label{display:block;font-size:13px;font-weight:700;color:var(--gris);margin-bottom:6px}
+.champ-groupe input{width:100%;padding:12px 14px;border:1.5px solid var(--gris-clair);border-radius:10px;
+  font-size:15px;font-family:inherit;background:#fff;color:var(--texte)}
+.champ-groupe input:focus{outline:none;border-color:var(--bleu)}
+.bouton{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--bleu);color:#fff;
+  font-weight:700;font-size:15px;padding:13px 20px;border:0;border-radius:10px;cursor:pointer;width:100%;
+  font-family:inherit;transition:background .2s}
+.bouton:hover{background:#1d7fe4}
+.bouton:disabled{opacity:.6;cursor:default}
+.bouton-secondaire{background:#fff;color:var(--texte);border:1.5px solid var(--gris-clair)}
+.bouton-secondaire:hover{background:var(--clair)}
+.bouton-danger{background:#E5484D}
+.bouton-danger:hover{background:#c73e42}
+.message-erreur{background:#FFF1F1;color:#C0272C;border:1px solid #FFD3D5;border-radius:10px;
+  padding:10px 14px;font-size:13.5px;margin-bottom:16px}
+.message-ok{background:#EAFBF1;color:#177B4B;border:1px solid #BEEFD4;border-radius:10px;
+  padding:10px 14px;font-size:13.5px}
+
+/* ---------- tableau de bord : mise en page avec sidebar ---------- */
+.admin-layout{display:flex;min-height:100vh}
+
+.admin-sidebar{width:264px;flex:none;background:var(--nuit);color:#fff;
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.side-logo{display:flex;align-items:center;gap:10px;padding:20px 20px 16px;
+  border-bottom:1px solid rgba(255,255,255,.1)}
+.side-logo .nom{display:block;font-weight:800;font-size:14.5px}
+.side-logo .sous{display:block;font-size:10px;font-weight:700;letter-spacing:.16em;
+  color:var(--bleu);margin-top:2px}
+.side-logo span:not(.nom):not(.sous){flex:1;min-width:0}
+
+.side-burger{display:none;margin-left:auto;background:none;border:1px solid rgba(255,255,255,.25);
+  border-radius:8px;padding:8px 10px;cursor:pointer;flex:none}
+.side-burger span{display:block;width:18px;height:2px;background:#fff;margin:3px 0;border-radius:2px;
+  transition:transform .3s,opacity .3s}
+.side-burger[aria-expanded="true"] span:nth-child(1){transform:translateY(5px) rotate(45deg)}
+.side-burger[aria-expanded="true"] span:nth-child(2){opacity:0}
+.side-burger[aria-expanded="true"] span:nth-child(3){transform:translateY(-5px) rotate(-45deg)}
+
+.side-drawer{display:flex;flex-direction:column;flex:1;min-height:0}
+.side-nav{flex:1;padding:14px 12px;display:flex;flex-direction:column;gap:2px}
+.side-nav button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:11px 12px;border-radius:9px;background:none;border:0;color:#B9C9E0;
+  font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s,color .2s}
+.side-nav button:hover{background:rgba(255,255,255,.07);color:#fff}
+.side-nav button.actif{background:var(--bleu);color:#fff}
+
+.side-bas{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);
+  display:flex;flex-direction:column;gap:10px}
+.lien-voir-site{font-size:13.5px;font-weight:600;color:#B9C9E0}
+.lien-voir-site:hover{color:#fff}
+.side-bas .bouton-mini{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff}
+.side-bas .bouton-mini:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3);color:#fff}
+
+.admin-main{flex:1;min-width:0;display:flex;flex-direction:column}
+.admin-topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--gris-clair);
+  padding:16px 28px;display:flex;align-items:center;gap:16px}
+.admin-topbar h1{margin:0;font-size:18px;font-weight:800;flex:1;min-width:0}
+.admin-topbar .bouton{width:auto;padding:11px 22px}
+
+.admin-contenu{padding:26px 28px 80px;max-width:760px}
+.page-section{display:none}
+.page-section.actif{display:block}
+
+.carte-admin{background:#fff;border:1px solid var(--gris-clair);border-radius:var(--r);
+  padding:24px 26px;margin-bottom:20px}
+.carte-admin h2{margin:0 0 18px;font-size:17px;font-weight:800}
+
+@media (max-width:860px){
+  .admin-layout{flex-direction:column}
+  /* la sidebar devient une barre logo + burger, le menu (onglets +
+     deconnexion) se deroule en tiroir juste en dessous */
+  .admin-sidebar{width:100%;height:auto;position:relative;overflow:visible;
+    display:block;background:var(--nuit)}
+  .side-logo{display:flex;align-items:center;border-bottom:0;padding:14px 16px}
+  .side-logo .sous{display:none}
+  .side-burger{display:inline-flex;flex-direction:column;align-items:center;justify-content:center}
+
+  .side-drawer{position:absolute;left:0;right:0;top:100%;z-index:15;background:var(--nuit);
+    max-height:0;overflow:hidden;transition:max-height .35s ease;
+    border-top:1px solid rgba(255,255,255,.08)}
+  .side-drawer.ouvert{max-height:calc(100vh - 60px);overflow-y:auto}
+
+  .side-nav{flex:none;padding:10px 12px;gap:2px}
+  .side-bas{flex-direction:column;align-items:stretch}
+
+  .admin-topbar{padding:14px 16px;flex-wrap:wrap}
+  .admin-topbar h1{font-size:16px}
+  .admin-contenu{padding:18px 16px 60px}
+}
+.ligne-champ{margin-bottom:14px}
+.ligne-champ label{display:block;font-size:12.5px;font-weight:700;color:var(--gris);margin-bottom:5px;
+  text-transform:uppercase;letter-spacing:.03em}
+.champ{width:100%;padding:10px 12px;border:1.5px solid var(--gris-clair);border-radius:8px;
+  font-size:14.5px;font-family:inherit;background:#fff;color:var(--texte)}
+.champ:focus{outline:none;border-color:var(--bleu)}
+textarea.champ{min-height:70px;resize:vertical}
+.champ-nombre{max-width:110px}
+
+.groupe-objet{border-left:3px solid var(--gris-clair);padding-left:16px;margin-bottom:6px}
+.item-liste{border:1px solid var(--gris-clair);border-radius:10px;padding:14px;margin-bottom:12px;
+  background:var(--clair);position:relative}
+.item-liste .bouton-supprimer{position:absolute;top:10px;right:10px}
+.bouton-mini{background:#fff;border:1.5px solid var(--gris-clair);border-radius:8px;padding:6px 12px;
+  font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--texte)}
+.bouton-mini:hover{border-color:var(--bleu);color:var(--bleu)}
+.bouton-mini.danger:hover{border-color:#E5484D;color:#E5484D}
+.bouton-ajouter{margin-top:4px}
+.case-a-cocher{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600}
+
+.bloc-image{display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.bloc-image img{width:90px;height:90px;object-fit:cover;border-radius:10px;border:1px solid var(--gris-clair)}
+.bloc-image .infos{flex:1;min-width:180px}
+.bloc-image .infos .label{font-weight:700;font-size:14px;margin-bottom:6px}
+.bloc-image input[type="file"]{font-size:13px}
+
+.section-galerie-admin h2{margin:0 0 8px;font-size:17px;font-weight:800}
+.texte-aide{margin:0 0 18px;color:var(--gris);font-size:13.5px}
+.galerie-admin-liste{display:flex;flex-direction:column;gap:16px;margin-bottom:16px}
+.bloc-galerie{display:grid;grid-template-columns:90px minmax(0,1fr);gap:16px;align-items:start}
+.galerie-preview{width:90px;height:90px;object-fit:cover;border-radius:10px;border:1px solid var(--gris-clair);background:#fff}
+.galerie-champs{min-width:0}
+.galerie-champs .champ{width:100%}
+.galerie-champs select.champ{appearance:auto}
+.galerie-champs textarea.champ{min-height:96px}
+
+.statut-enregistrement{font-size:13.5px;font-weight:600;color:var(--gris)}
+.statut-enregistrement.ok{color:#177B4B}
+.statut-enregistrement.erreur{color:#C0272C}
+
+@media (max-width:640px){
+  .admin-contenu{padding:18px 16px 60px}
+  .carte-admin{padding:18px 16px}
+  .bloc-galerie{grid-template-columns:1fr}
+  .galerie-preview{width:100%;height:180px}
+}

@@ -1,0 +1,194 @@
+{
+  "telephone": "+33 6 34 16 62 08",
+  "images": {
+    "hero": "images/hero.jpg",
+    "servicePlomberie": "images/service-plomberie.jpg",
+    "serviceElectricite": "images/service-electricite.jpg"
+  },
+  "galerie": [
+    {
+      "image": "images/hero.jpg",
+      "categorie": "plomberie",
+      "titre": "Réfection de salle de bain",
+      "texte": "Une intervention complète avec recherche de fuite, remplacement et remise en service."
+    },
+    {
+      "image": "images/service-electricite.jpg",
+      "categorie": "electricite",
+      "titre": "Mise en sécurité tableau",
+      "texte": "Diagnostic, correction des défauts et reprise propre des circuits sensibles."
+    },
+    {
+      "image": "images/service-plomberie.jpg",
+      "categorie": "mixte",
+      "titre": "Coordination multi-lots",
+      "texte": "Une prise en charge globale pour enchaîner les corps de métier sans perte de temps."
+    },
+    {
+      "image": "images/hero.jpg",
+      "categorie": "renovation",
+      "titre": "Rafraîchissement intérieur",
+      "texte": "Des interventions qui repartent d’un point de départ sain, propre et net."
+    },
+    {
+      "image": "images/service-plomberie.jpg",
+      "categorie": "plomberie",
+      "titre": "Recherche de fuite",
+      "texte": "Localisation rapide et reprise ciblée pour limiter l’impact sur le logement."
+    },
+    {
+      "image": "images/service-electricite.jpg",
+      "categorie": "electricite",
+      "titre": "Câblage et dépannage",
+      "texte": "Des photos de réalisations pour suivre les interventions par famille de travaux."
+    }
+  ],
+  "hero": {
+    "titre": "Une urgence ?",
+    "accent": "On intervient.",
+    "sousTitre": "Plomberie, électricité et dépannage.<br>Une équipe à votre service pour intervenir rapidement et remettre votre installation en état.",
+    "intro": "Société tout corps d'état, LM86 Services prend en charge vos urgences 7j/7 avec des devis transmis sous 48h."
+  },
+  "badges": {
+    "tce": "Société tout corps d'état",
+    "d48h": "Tous les devis sous 48h"
+  },
+  "garanties": {
+    "tceTitre": "Société tout corps d'état",
+    "tceTexte": "Plomberie, électricité et rénovation : un seul interlocuteur pour tous vos travaux.",
+    "devisTitre": "Tous les devis sous 48h",
+    "devisTexte": "Un devis clair, chiffré et transmis sous 48 heures pour chaque demande."
+  },
+  "services": [
+    {
+      "titre": "Problèmes de plomberie",
+      "icone": "eau",
+      "actif": true,
+      "items": [
+        "Fuites d'eau",
+        "Canalisations bouchées",
+        "WC, lavabo et évier bouchés",
+        "Fuites de robinetterie",
+        "Problèmes de tuyauterie",
+        "Panne de chauffe-eau",
+        "Dégâts des eaux",
+        "Réparation et remplacement d'équipements sanitaires"
+      ]
+    },
+    {
+      "titre": "Dépannage électrique",
+      "icone": "elec",
+      "actif": true,
+      "items": [
+        "Pannes électriques",
+        "Coupures de courant",
+        "Disjoncteur qui saute",
+        "Prises ou interrupteurs défectueux",
+        "Recherche de panne"
+      ]
+    }
+  ],
+  "tarifs": [
+    {
+      "nom": "Diagnostic plomberie",
+      "description": "Évaluation technique sur place et recherche du problème avant toute action.",
+      "prix": "65 €",
+      "prefixe": "À partir de",
+      "duree": "",
+      "categorie": "plomberie",
+      "badge": "",
+      "disponible": true,
+      "ordre": 1,
+      "actif": true
+    },
+    {
+      "nom": "Dépannage électrique",
+      "description": "Diagnostic rapide, mise en sécurité et remise en service de l'installation.",
+      "prix": "90 €",
+      "prefixe": "À partir de",
+      "duree": "",
+      "categorie": "electricite",
+      "badge": "LE PLUS DEMANDÉ",
+      "disponible": true,
+      "ordre": 2,
+      "actif": true
+    },
+    {
+      "nom": "Débouchage",
+      "description": "Intervention sur canalisations, WC, lavabos et évier.",
+      "prix": "105 €",
+      "prefixe": "À partir de",
+      "duree": "",
+      "categorie": "canalisation",
+      "badge": "",
+      "disponible": true,
+      "ordre": 3,
+      "actif": true
+    },
+    {
+      "nom": "Chauffe-eau",
+      "description": "Dépannage, vérification et remplacement si nécessaire.",
+      "prix": "120 €",
+      "prefixe": "À partir de",
+      "duree": "",
+      "categorie": "chauffe-eau",
+      "badge": "",
+      "disponible": true,
+      "ordre": 4,
+      "actif": true
+    }
+  ],
+  "apropos": {
+    "paragraphe1": "LM86 Services réunit des techniciens qualifiés en plomberie et en électricité, formés aux règles de sécurité en vigueur. Notre objectif : intervenir vite, travailler proprement et vous expliquer clairement ce qui a été fait.",
+    "paragraphe2": "Urgence de nuit, week-end ou jour férié : notre équipe reste joignable et se déplace directement chez vous ou dans vos locaux professionnels, sur toute notre zone d'intervention.",
+    "valeurs": [
+      "Devis clair avant intervention",
+      "Techniciens assurés et équipés",
+      "Intervention propre et sécurisée"
+    ],
+    "stats": [
+      {
+        "chiffre": 7,
+        "unite": "j/7",
+        "legende": "Disponibles toute la semaine"
+      },
+      {
+        "chiffre": 24,
+        "unite": "h/24",
+        "legende": "Y compris nuits et jours fériés"
+      },
+      {
+        "chiffre": 2,
+        "unite": "métiers",
+        "legende": "Plomberie &amp; électricité réunies"
+      }
+    ]
+  },
+  "avis": [
+    {
+      "etoiles": 5,
+      "texte": "Intervention rapide pour une fuite d'eau un dimanche soir, technicien efficace et prix annoncé respecté.",
+      "auteur": "Client à [Ville]",
+      "exemple": true
+    },
+    {
+      "etoiles": 5,
+      "texte": "Disjoncteur qui sautait sans arrêt : diagnostic clair, réparation propre le jour même. Je recommande.",
+      "auteur": "Client à [Ville]",
+      "exemple": true
+    },
+    {
+      "etoiles": 5,
+      "texte": "Chauffe-eau en panne, remplacé rapidement avec une bonne explication du tarif avant de commencer.",
+      "auteur": "Client à [Ville]",
+      "exemple": true
+    }
+  ],
+  "urgence": {
+    "titre": "Une urgence ?<br>N'attendez pas.",
+    "texte": "Fuite d'eau, panne électrique ou problème de chauffe-eau ? LM86 Services est à votre disposition 7j/7, avec un devis transmis sous 48h."
+  },
+  "footer": {
+    "copyright": "© 2026 LM86 Services. Tous droits réservés."
+  }
+}

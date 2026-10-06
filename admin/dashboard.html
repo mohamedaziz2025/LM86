@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Tableau de bord — LM86 Services</title>
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <div class="side-logo">
+      <svg width="26" height="26" viewBox="0 0 48 48" aria-hidden="true">
+        <path d="M24 5.6S11 21.2 11 30a13 13 0 0 0 26 0C37 21.2 24 5.6 24 5.6Z" fill="#2B8FF5"/>
+        <path d="M25.5 17 16.5 29h6.5l-1 8 9.5-12.5H25L25.5 17Z" fill="#F5A623"/>
+      </svg>
+      <span><span class="nom">LM86 Services</span><span class="sous">ADMINISTRATION</span></span>
+      <button class="side-burger" id="sideBurger" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="sideDrawer">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <div class="side-drawer" id="sideDrawer">
+      <nav class="side-nav" id="sideNav"><!-- boutons generes par admin.js --></nav>
+      <div class="side-bas">
+        <a class="lien-voir-site" href="/" target="_blank" rel="noopener">Voir le site ↗</a>
+        <button class="bouton-mini" id="boutonDeconnexion" type="button">Déconnexion</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <h1 id="titrePage">Chargement…</h1>
+      <span class="statut-enregistrement" id="statutEnregistrement"></span>
+      <button class="bouton" id="boutonEnregistrer" type="button">Enregistrer</button>
+    </header>
+    <div class="admin-contenu" id="conteneur">
+      <p>Chargement du contenu…</p>
+    </div>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>
