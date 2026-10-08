@@ -174,12 +174,12 @@ app.post("/api/logout", (req, res) => {
 // ------------------------------------------------------------------
 // upload d'images (admin uniquement)
 // ------------------------------------------------------------------
+const extsAutoriseesUpload = [".jpg", ".jpeg", ".png", ".webp", ".svg"];
 const stockageUpload = multer.diskStorage({
   destination: DOSSIER_IMAGES,
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
-    const extsAutorisees = [".jpg", ".jpeg", ".png", ".webp", ".svg"];
-    if (!extsAutorisees.includes(ext)) return cb(new Error("Format d'image non autorise."));
+    if (!extsAutoriseesUpload.includes(ext)) return cb(new Error("Format d'image non autorise."));
     const nom = "photo-" + Date.now() + "-" + crypto.randomBytes(4).toString("hex") + ext;
     cb(null, nom);
   },
@@ -188,8 +188,9 @@ const upload = multer({
   storage: stockageUpload,
   limits: { fileSize: 8 * 1024 * 1024 }, // 8 Mo
   fileFilter: (req, file, cb) => {
-    if (!file.mimetype.startsWith("image/")) return cb(new Error("Fichier non image refuse."));
-    cb(null, true);
+    const ext = path.extname(file.originalname || "").toLowerCase();
+    if (file.mimetype.startsWith("image/") || extsAutoriseesUpload.includes(ext)) return cb(null, true);
+    cb(new Error("Fichier non image refuse."));
   },
 });
 

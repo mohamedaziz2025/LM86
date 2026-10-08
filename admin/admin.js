@@ -354,20 +354,87 @@
   }
 
   // ------------------------------------------------------------------
-  // envoi d'images — un ou plusieurs fichiers dans une seule requete
+  // envoi d'images — conversion en WebP avant envoi + decoupe auto
+  // en cas de 413 (proxy qui limite la taille du corps de requete)
   // ------------------------------------------------------------------
-  function envoyerFichiers(fichiers) {
+  function versWebP(fichier) {
+    return new Promise(function (resolve) {
+      if (!fichier || !/^image\//.test(fichier.type) || fichier.type === "image/svg+xml" || fichier.type === "image/webp") {
+        return resolve(fichier);
+      }
+      var url = URL.createObjectURL(fichier);
+      var img = new Image();
+      var fini = false;
+      function terminer(f) {
+        if (fini) return;
+        fini = true;
+        URL.revokeObjectURL(url);
+        resolve(f);
+      }
+      img.onload = function () {
+        try {
+          var max = 1920;
+          var l = img.naturalWidth || img.width;
+          var h = img.naturalHeight || img.height;
+          if (!l || !h) return terminer(fichier);
+          var ratio = Math.min(1, max / Math.max(l, h));
+          var cv = document.createElement("canvas");
+          cv.width = Math.max(1, Math.round(l * ratio));
+          cv.height = Math.max(1, Math.round(h * ratio));
+          cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+          cv.toBlob(function (blob) {
+            if (!blob) return terminer(fichier);
+            if (blob.size >= fichier.size && /\.webp$/i.test(fichier.name)) return terminer(fichier);
+            var ext = blob.type === "image/webp" ? ".webp" : ".jpg";
+            var nom = fichier.name.replace(/\.[^.]+$/, "") + ext;
+            terminer(new File([blob], nom, { type: blob.type, lastModified: Date.now() }));
+          }, "image/webp", 0.82);
+        } catch (e) {
+          terminer(fichier);
+        }
+      };
+      img.onerror = function () { terminer(fichier); };
+      img.src = url;
+    });
+  }
+
+  function envoyerUnLot(fichiers) {
     var donnees = new FormData();
     fichiers.forEach(function (f) { donnees.append("image", f); });
 
     return fetch("/api/upload", { method: "POST", body: donnees })
       .then(lireReponse)
       .then(function (res) {
+        if (res.status === 413) {
+          var e = new Error("Requete trop volumineuse.");
+          e.tropVolumineux = true;
+          throw e;
+        }
         if (!res.ok || !res.d) throw new Error(messageErreur(res, "Echec de l'envoi."));
         if (res.d.chemins && res.d.chemins.length) return res.d.chemins;
         if (res.d.chemin) return [res.d.chemin];
         throw new Error("Echec de l'envoi.");
       });
+  }
+
+  function envoyerEnLots(fichiers) {
+    return envoyerUnLot(fichiers).catch(function (err) {
+      if (!err.tropVolumineux) throw err;
+      if (fichiers.length <= 1) throw new Error("Fichier trop volumineux pour le serveur.");
+      // le proxy a refuse : on renvoie par moities jusqu'a passer
+      var milieu = Math.ceil(fichiers.length / 2);
+      return envoyerEnLots(fichiers.slice(0, milieu)).then(function (premiers) {
+        return envoyerEnLots(fichiers.slice(milieu)).then(function (autres) {
+          return premiers.concat(autres);
+        });
+      });
+    });
+  }
+
+  function envoyerFichiers(fichiers) {
+    return Promise.all(fichiers.map(versWebP)).then(function (prets) {
+      return envoyerEnLots(prets);
+    });
   }
 
   // ------------------------------------------------------------------
@@ -611,7 +678,7 @@
         var retenus = fichiers.slice(0, restant);
         var ignores = fichiers.length - retenus.length;
 
-        statut.textContent = "Envoi de " + retenus.length + " image(s)...";
+        statut.textContent = "Conversion en WebP + envoi de " + retenus.length + " image(s)...";
         statut.className = "statut-enregistrement";
 
         envoyerFichiers(retenus)
@@ -689,7 +756,7 @@
       var fichiers = Array.prototype.slice.call(fichiersBulk.files || []);
       if (!fichiers.length) return;
       var retenus = fichiers.slice(0, LIMITE_PHOTOS);
-      afficherStatut("Envoi de " + retenus.length + " photos...", "");
+      afficherStatut("Conversion en WebP + envoi de " + retenus.length + " photos...", "");
       envoyerFichiers(retenus)
         .then(function (chemins) {
           ajouterItem({ images: chemins, categorie: "plomberie", titre: "", texte: "" });
@@ -758,19 +825,15 @@
       fileInput.addEventListener("change", function () {
         var fichier = fileInput.files[0];
         if (!fichier) return;
-        statut.textContent = "Envoi en cours...";
+        statut.textContent = "Conversion en WebP + envoi...";
         statut.className = "statut-enregistrement";
 
-        var donnees = new FormData();
-        donnees.append("image", fichier);
-
-        fetch("/api/upload", { method: "POST", body: donnees })
-          .then(lireReponse)
-          .then(function (res) {
-            if (!res.ok || !res.d || !res.d.chemin) throw new Error(messageErreur(res, "Echec de l'envoi."));
+        envoyerFichiers([fichier])
+          .then(function (chemins) {
+            var chemin = chemins[0];
             contenuCourant.images = contenuCourant.images || {};
-            contenuCourant.images[slot.cle] = res.d.chemin;
-            img.src = "/" + res.d.chemin + "?t=" + Date.now();
+            contenuCourant.images[slot.cle] = chemin;
+            img.src = "/" + chemin + "?t=" + Date.now();
             return enregistrerContenu(true);
           })
           .then(function () {

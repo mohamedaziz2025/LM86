@@ -233,7 +233,8 @@
       echapper(titre) +
       '</h3><p>' +
       echapper(texte) +
-      '</p><span class="fleche-carte" aria-hidden="true">→</span></div></article>'
+      '</p><span class="fleche-carte" aria-hidden="true">→</span></div>' +
+      '<a class="lien-fiche" href="fiche.html?i=' + index + '" aria-label="Ouvrir la fiche"></a></article>'
     );
   }
 
