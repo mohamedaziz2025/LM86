@@ -189,12 +189,31 @@
     definirSrc('[data-f-img="hero"]', images.hero);
   }
 
+  function imagesGalerie(item) {
+    if (Array.isArray(item.images) && item.images.length) {
+      return item.images.filter(function (s) { return typeof s === "string" && s; });
+    }
+    return item.image ? [item.image] : [];
+  }
+
   function creerCarteGalerie(item, index) {
-    var image = item.image || "images/hero.jpg";
+    var images = imagesGalerie(item);
+    var image = images[0] || "images/hero.jpg";
     var categorie = item.categorie || item.category || "";
     var titre = item.titre || item.title || "";
     var texte = item.texte || item.description || "";
     var etiquette = item.categorieLabel || libelleCategorie(categorie);
+
+    var vignettes = "";
+    if (images.length > 1) {
+      vignettes = '<div class="galerie-vignettes">' + images.map(function (src, i) {
+        return (
+          '<button type="button" class="galerie-vignette' + (i === 0 ? " actif" : "") +
+          '" data-vignette="' + echapper(src) + '" aria-label="Voir la photo ' + (i + 1) + ' sur ' + images.length + '">' +
+          '<img src="' + echapper(src) + '" alt="" loading="lazy"></button>'
+        );
+      }).join("") + "</div>";
+    }
 
     return (
       '<article class="galerie-carte reveal" data-galerie-item data-category="' +
@@ -204,9 +223,10 @@
       's">' +
       '<img src="' +
       echapper(image) +
-      '" width="1376" height="768" loading="lazy" alt="' +
+      '" data-galerie-principale width="1376" height="768" loading="lazy" alt="' +
       echapper(titre || etiquette) +
       '">' +
+      vignettes +
       '<div class="galerie-contenu"><span class="tag">' +
       echapper(etiquette) +
       '</span><h3>' +
@@ -216,6 +236,20 @@
       '</p><span class="fleche-carte" aria-hidden="true">→</span></div></article>'
     );
   }
+
+  // clic sur une vignette -> la photo passe en avant dans la fiche
+  document.addEventListener("click", function (e) {
+    var bouton = e.target && e.target.closest ? e.target.closest("[data-vignette]") : null;
+    if (!bouton) return;
+    var carte = bouton.closest(".galerie-carte");
+    if (!carte) return;
+    var principale = carte.querySelector("[data-galerie-principale]");
+    if (principale) principale.src = bouton.getAttribute("data-vignette");
+    var toutes = carte.querySelectorAll(".galerie-vignette");
+    for (var i = 0; i < toutes.length; i++) {
+      toutes[i].classList.toggle("actif", toutes[i] === bouton);
+    }
+  });
 
   function appliquerGalerie(galerie) {
     if (!Array.isArray(galerie)) return;

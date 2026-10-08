@@ -195,9 +195,18 @@ const upload = multer({
 
 // accepte un ou plusieurs fichiers sous le meme champ "image"
 // (input multiple -> une seule requete, reponse avec la liste des chemins)
+const MESSAGES_MULTER = {
+  LIMIT_FILE_COUNT: "Trop de fichiers : 20 photos maximum par envoi.",
+  LIMIT_UNEXPECTED_FILE: "Trop de fichiers : 20 photos maximum par envoi.",
+  LIMIT_FILE_SIZE: "Image trop volumineuse : 8 Mo maximum par photo.",
+  LIMIT_PART_COUNT: "Requete d'envoi invalide.",
+  LIMIT_FIELD_COUNT: "Requete d'envoi invalide.",
+  LIMIT_FIELD_VALUE: "Requete d'envoi invalide.",
+  LIMIT_FIELD_SIZE: "Requete d'envoi invalide.",
+};
 app.post("/api/upload", exigerAuth, (req, res) => {
   upload.array("image", 20)(req, res, (err) => {
-    if (err) return res.status(400).json({ erreur: err.message });
+    if (err) return res.status(400).json({ erreur: MESSAGES_MULTER[err.code] || err.message });
     const fichiers = req.files || [];
     if (!fichiers.length) return res.status(400).json({ erreur: "Aucun fichier recu." });
     const chemins = fichiers.map((f) => "images/" + f.filename);
@@ -213,7 +222,11 @@ app.post("/api/upload", exigerAuth, (req, res) => {
 app.get("/admin/dashboard.html", exigerAuthPage, (req, res) => {
   res.sendFile(path.join(RACINE, "admin", "dashboard.html"));
 });
-app.use("/admin", express.static(path.join(RACINE, "admin")));
+// jamais de cache sur l'admin : un admin.js rafraichi apres un correctif
+// doit etre recharge sans rechargement force du navigateur.
+app.use("/admin", express.static(path.join(RACINE, "admin"), {
+  setHeaders: (res) => res.setHeader("Cache-Control", "no-store"),
+}));
 app.use(express.static(path.join(RACINE, "public")));
 
 // ------------------------------------------------------------------

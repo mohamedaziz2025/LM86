@@ -210,7 +210,8 @@
           return;
         }
 
-        var cible = document.querySelector(hash);
+        var cible = null;
+        try { cible = document.querySelector(hash); } catch (e) { cible = null; }
         if (!cible) return;
 
         if (!larges.matches) {

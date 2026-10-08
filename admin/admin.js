@@ -383,7 +383,7 @@
 
     var intro = document.createElement("p");
     intro.className = "texte-aide";
-    intro.textContent = "Ajoute ici les photos visibles sur la page galerie. Tu peux sélectionner plusieurs images à la fois : chacune devient une nouvelle photo. Le site affichera automatiquement toutes les entrées enregistrées.";
+    intro.textContent = "Ajoute ici les photos visibles sur la page galerie. Chaque fiche peut contenir plusieurs photos (20 max) : la photo n°1 est celle affichée en avant sur le site. Clique sur une vignette puis utilise « Déplacer avant / après », « Mettre en avant » ou « Retirer ».";
     wrapper.appendChild(intro);
 
     var itemsWrap = document.createElement("div");
@@ -391,15 +391,23 @@
     wrapper.appendChild(itemsWrap);
 
     var lecteursItems = [];
+    var LIMITE_PHOTOS = 20;
 
     function valeurVideGalerie() {
-      return { image: "", categorie: "plomberie", titre: "", texte: "" };
+      return { images: [], categorie: "plomberie", titre: "", texte: "" };
     }
 
     function normaliserItem(item) {
       item = item && typeof item === "object" ? item : valeurVideGalerie();
+      var images = [];
+      if (Array.isArray(item.images)) {
+        item.images.forEach(function (i) {
+          if (typeof i === "string" && i && images.indexOf(i) === -1) images.push(i);
+        });
+      }
+      if (!images.length && typeof item.image === "string" && item.image) images.push(item.image);
       return {
-        image: typeof item.image === "string" ? item.image : "",
+        images: images,
         categorie: typeof item.categorie === "string" ? item.categorie : "plomberie",
         titre: typeof item.titre === "string" ? item.titre : "",
         texte: typeof item.texte === "string" ? item.texte : "",
@@ -408,14 +416,23 @@
 
     function ajouterItem(valeurItem) {
       var item = normaliserItem(valeurItem);
+      var selection = 0;
       var bloc = document.createElement("div");
       bloc.className = "item-liste bloc-galerie";
 
+      // colonne gauche : apercu de la photo en avant + compteur
+      var colonne = document.createElement("div");
+      colonne.className = "galerie-preview-col";
+
       var apercu = document.createElement("img");
       apercu.className = "galerie-preview";
-      apercu.src = "/" + (item.image || "");
       apercu.alt = item.titre || "Aperçu photo";
-      bloc.appendChild(apercu);
+      colonne.appendChild(apercu);
+
+      var compteur = document.createElement("div");
+      compteur.className = "galerie-compteur";
+      colonne.appendChild(compteur);
+      bloc.appendChild(colonne);
 
       var champs = document.createElement("div");
       champs.className = "galerie-champs";
@@ -462,40 +479,154 @@
       fileInput.type = "file";
       fileInput.accept = "image/*";
       fileInput.multiple = true;
-      ajouterChampLabel("Image (plusieurs à la fois possible)", fileInput);
+      ajouterChampLabel("Photos (plusieurs à la fois, 20 max)", fileInput);
 
       var statut = document.createElement("div");
       statut.className = "statut-enregistrement";
       champs.appendChild(statut);
 
+      // vignettes : clique pour selectionner, puis boutons d'ordre
+      var vignettesWrap = document.createElement("div");
+      vignettesWrap.className = "galerie-vignettes-admin";
+      champs.appendChild(vignettesWrap);
+
+      var actionsWrap = document.createElement("div");
+      actionsWrap.className = "galerie-actions-vignettes";
+      champs.appendChild(actionsWrap);
+
+      function echanger(a, b) {
+        var tmp = item.images[a];
+        item.images[a] = item.images[b];
+        item.images[b] = tmp;
+      }
+
+      function sauverImages(message) {
+        statut.textContent = "Enregistrement...";
+        statut.className = "statut-enregistrement";
+        enregistrerContenu(true)
+          .then(function () {
+            statut.textContent = message + " ✓";
+            statut.className = "statut-enregistrement ok";
+          })
+          .catch(function (err) {
+            statut.textContent = err.message || "Erreur.";
+            statut.className = "statut-enregistrement erreur";
+          });
+      }
+
+      function boutonAction(texte, action) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "bouton-mini";
+        b.textContent = texte;
+        b.addEventListener("click", function () {
+          action();
+          dessinerImages();
+        });
+        actionsWrap.appendChild(b);
+        return b;
+      }
+
+      var bAvant = boutonAction("◀ Déplacer avant", function () {
+        if (selection <= 0) return;
+        echanger(selection, selection - 1);
+        selection -= 1;
+        sauverImages("Ordre des photos mis à jour");
+      });
+
+      var bApres = boutonAction("Déplacer après ▶", function () {
+        if (selection >= item.images.length - 1) return;
+        echanger(selection, selection + 1);
+        selection += 1;
+        sauverImages("Ordre des photos mis à jour");
+      });
+
+      var bEnAvant = boutonAction("★ Mettre en avant", function () {
+        if (selection <= 0) return;
+        var src = item.images.splice(selection, 1)[0];
+        item.images.unshift(src);
+        selection = 0;
+        sauverImages("Photo en avant mise à jour");
+      });
+
+      var bRetirer = boutonAction("✖ Retirer", function () {
+        if (!item.images.length) return;
+        if (!confirm("Retirer cette photo de la fiche ?")) return;
+        item.images.splice(selection, 1);
+        if (selection >= item.images.length) selection = item.images.length - 1;
+        if (selection < 0) selection = 0;
+        sauverImages("Photo retirée de la fiche");
+      });
+
+      function dessinerImages() {
+        if (selection >= item.images.length) selection = item.images.length - 1;
+        if (selection < 0) selection = 0;
+
+        apercu.src = item.images.length ? "/" + item.images[0] : "/images/favicon.svg";
+        apercu.alt = titreInput.value || "Aperçu photo";
+        compteur.textContent = item.images.length
+          ? item.images.length + " photo(s) · n°1 affichée en avant"
+          : "Aucune photo";
+
+        vignettesWrap.innerHTML = "";
+        item.images.forEach(function (src, i) {
+          var v = document.createElement("button");
+          v.type = "button";
+          v.className = "galerie-vignette-admin" + (i === selection ? " actif" : "") + (i === 0 ? " principale" : "");
+          v.title = i === 0 ? "Photo en avant (affichée en premier sur le site)" : "Photo " + (i + 1);
+          var vim = document.createElement("img");
+          vim.src = "/" + src;
+          vim.alt = "";
+          v.appendChild(vim);
+          var num = document.createElement("span");
+          num.className = "num";
+          num.textContent = String(i + 1);
+          v.appendChild(num);
+          v.addEventListener("click", function () {
+            selection = i;
+            dessinerImages();
+          });
+          vignettesWrap.appendChild(v);
+        });
+
+        var n = item.images.length;
+        bAvant.disabled = n < 2 || selection <= 0;
+        bApres.disabled = n < 2 || selection >= n - 1;
+        bEnAvant.disabled = n < 2 || selection === 0;
+        bRetirer.disabled = n === 0;
+        actionsWrap.style.display = n ? "" : "none";
+      }
+
       fileInput.addEventListener("change", function () {
         var fichiers = Array.prototype.slice.call(fileInput.files || []);
         if (!fichiers.length) return;
-        statut.textContent = "Envoi de " + fichiers.length + " image(s)...";
+
+        var restant = LIMITE_PHOTOS - item.images.length;
+        if (restant <= 0) {
+          statut.textContent = "Maximum " + LIMITE_PHOTOS + " photos par fiche.";
+          statut.className = "statut-enregistrement erreur";
+          fileInput.value = "";
+          return;
+        }
+        var retenus = fichiers.slice(0, restant);
+        var ignores = fichiers.length - retenus.length;
+
+        statut.textContent = "Envoi de " + retenus.length + " image(s)...";
         statut.className = "statut-enregistrement";
 
-        envoyerFichiers(fichiers)
+        envoyerFichiers(retenus)
           .then(function (chemins) {
-            item.image = chemins[0];
-            apercu.src = "/" + chemins[0] + "?t=" + Date.now();
-            apercu.alt = titreInput.value || "Aperçu photo";
-            // les images supplémentaires ouvrent une nouvelle fiche chacune
-            for (var i = 1; i < chemins.length; i++) {
-              ajouterItem({
-                image: chemins[i],
-                categorie: categorieInput.value,
-                titre: "",
-                texte: "",
-              });
-            }
+            item.images = item.images.concat(chemins).slice(0, LIMITE_PHOTOS);
             fileInput.value = "";
+            dessinerImages();
             return enregistrerContenu(true);
           })
           .then(function () {
-            var n = fichiers.length;
-            statut.textContent = n > 1
-              ? n + " images enregistrées ✓"
-              : "Image mise à jour et enregistrée ✓";
+            var msg = retenus.length > 1
+              ? retenus.length + " photos ajoutées à la fiche ✓ (" + item.images.length + "/" + LIMITE_PHOTOS + ")"
+              : "Photo ajoutée à la fiche ✓ (" + item.images.length + "/" + LIMITE_PHOTOS + ")";
+            if (ignores) msg += " — " + ignores + " ignorée(s)";
+            statut.textContent = msg;
             statut.className = "statut-enregistrement ok";
           })
           .catch(function (err) {
@@ -509,13 +640,14 @@
       });
 
       bloc.appendChild(champs);
+      dessinerImages();
 
       var boutonSupprimer = document.createElement("button");
       boutonSupprimer.type = "button";
       boutonSupprimer.className = "bouton-mini danger bouton-supprimer";
       boutonSupprimer.textContent = "Supprimer";
       boutonSupprimer.addEventListener("click", function () {
-        if (!confirm("Supprimer cette photo ?")) return;
+        if (!confirm("Supprimer cette fiche ?")) return;
         var idx = lecteursItems.indexOf(entree);
         if (idx > -1) lecteursItems.splice(idx, 1);
         bloc.remove();
@@ -524,7 +656,8 @@
 
       var entree = function () {
         return {
-          image: item.image,
+          image: item.images[0] || "",
+          images: item.images.slice(),
           categorie: categorieInput.value,
           titre: titreInput.value,
           texte: texteInput.value,
@@ -537,7 +670,7 @@
 
     galerie.forEach(ajouterItem);
 
-    // import en masse : un seul sélecteur, une fiche créée par image
+    // import en masse : toutes les photos choisies partent dans une seule fiche
     var fichiersBulk = document.createElement("input");
     fichiersBulk.type = "file";
     fichiersBulk.accept = "image/*";
@@ -548,24 +681,25 @@
     var boutonBulk = document.createElement("button");
     boutonBulk.type = "button";
     boutonBulk.className = "bouton-mini bouton-ajouter";
-    boutonBulk.textContent = "+ Ajouter plusieurs photos";
+    boutonBulk.textContent = "+ Ajouter plusieurs photos (nouvelle fiche)";
     boutonBulk.addEventListener("click", function () { fichiersBulk.click(); });
     wrapper.appendChild(boutonBulk);
 
     fichiersBulk.addEventListener("change", function () {
       var fichiers = Array.prototype.slice.call(fichiersBulk.files || []);
       if (!fichiers.length) return;
-      afficherStatut("Envoi de " + fichiers.length + " images...", "");
-      envoyerFichiers(fichiers)
+      var retenus = fichiers.slice(0, LIMITE_PHOTOS);
+      afficherStatut("Envoi de " + retenus.length + " photos...", "");
+      envoyerFichiers(retenus)
         .then(function (chemins) {
-          chemins.forEach(function (chemin) {
-            ajouterItem({ image: chemin, categorie: "plomberie", titre: "", texte: "" });
-          });
+          ajouterItem({ images: chemins, categorie: "plomberie", titre: "", texte: "" });
           fichiersBulk.value = "";
           return enregistrerContenu(true);
         })
         .then(function () {
-          afficherStatut(fichiers.length + " photos ajoutées à la galerie ✓", "ok");
+          var msg = retenus.length + " photos ajoutées dans une nouvelle fiche ✓ (donne-lui un titre puis Enregistrer)";
+          if (fichiers.length > retenus.length) msg += " — " + (fichiers.length - retenus.length) + " ignorée(s)";
+          afficherStatut(msg, "ok");
         })
         .catch(function (err) {
           afficherStatut("Erreur : " + (err.message || "echec de l'envoi."), "erreur");
@@ -575,7 +709,7 @@
     var boutonAjouter = document.createElement("button");
     boutonAjouter.type = "button";
     boutonAjouter.className = "bouton-mini bouton-ajouter";
-    boutonAjouter.textContent = "+ Ajouter une photo";
+    boutonAjouter.textContent = "+ Ajouter une fiche";
     boutonAjouter.addEventListener("click", function () {
       ajouterItem(valeurVideGalerie());
     });

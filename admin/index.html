@@ -43,7 +43,7 @@
   var bouton = document.getElementById('boutonConnexion');
 
   // deja connecte ? on saute directement au tableau de bord
-  fetch('/api/session').then(function(r){ return r.json(); }).then(function(s){
+  fetch('/api/session').then(function(r){ return r.text().then(function(t){ var d=null; try{ d=JSON.parse(t);}catch(e){} return d; }); }).then(function(s){
     if(s && s.connecte) window.location.href = 'dashboard.html';
   }).catch(function(){});
 

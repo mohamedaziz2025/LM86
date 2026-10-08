@@ -147,6 +147,19 @@ textarea.champ{min-height:70px;resize:vertical}
 .galerie-champs select.champ{appearance:auto}
 .galerie-champs textarea.champ{min-height:96px}
 
+.galerie-compteur{font-size:11.5px;font-weight:700;color:var(--gris);margin-top:7px;line-height:1.35}
+.galerie-vignettes-admin{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+.galerie-vignette-admin{position:relative;width:66px;padding:0;border:2px solid var(--gris-clair);
+  border-radius:8px;overflow:hidden;background:#fff;cursor:pointer}
+.galerie-vignette-admin img{display:block;width:100%;height:48px;object-fit:cover;pointer-events:none}
+.galerie-vignette-admin .num{position:absolute;left:0;top:0;background:rgba(0,0,0,.62);color:#fff;
+  font-size:10px;font-weight:800;padding:1px 5px;border-radius:0 0 6px 0}
+.galerie-vignette-admin.actif{border-color:var(--bleu)}
+.galerie-vignette-admin.principale::after{content:"★";position:absolute;right:3px;top:1px;
+  color:var(--jaune);font-size:11px;text-shadow:0 1px 2px rgba(0,0,0,.8)}
+.galerie-actions-vignettes{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.bouton-mini:disabled{opacity:.45;cursor:default;border-color:var(--gris-clair);color:var(--gris)}
+
 .statut-enregistrement{font-size:13.5px;font-weight:600;color:var(--gris)}
 .statut-enregistrement.ok{color:#177B4B}
 .statut-enregistrement.erreur{color:#C0272C}
