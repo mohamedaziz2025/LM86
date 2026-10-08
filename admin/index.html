@@ -61,10 +61,11 @@
         motDePasse: document.getElementById('motDePasse').value
       })
     })
-    .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, d: d }; }); })
+    .then(function(r){ return r.text().then(function(t){ var d=null; try{ d=JSON.parse(t);}catch(e){} return { ok:r.ok, d:d }; }); })
     .then(function(res){
       if(!res.ok){
-        zoneErreur.innerHTML = '<div class="message-erreur">' + (res.d.erreur || 'Connexion impossible.') + '</div>';
+        var msg = (res.d && res.d.erreur) || (res.status === 413 ? 'Requete trop volumineuse.' : 'Connexion impossible.');
+        zoneErreur.innerHTML = '<div class="message-erreur">' + msg + '</div>';
         bouton.disabled = false;
         bouton.textContent = 'Se connecter';
         return;

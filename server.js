@@ -48,7 +48,7 @@ function admin() {
 // ------------------------------------------------------------------
 const app = express();
 app.disable("x-powered-by");
-app.use(express.json({ limit: "1mb" }));
+app.use(express.json({ limit: "10mb" }));
 
 const secretSession =
   process.env.SESSION_SECRET ||
@@ -215,6 +215,22 @@ app.get("/admin/dashboard.html", exigerAuthPage, (req, res) => {
 });
 app.use("/admin", express.static(path.join(RACINE, "admin")));
 app.use(express.static(path.join(RACINE, "public")));
+
+// ------------------------------------------------------------------
+// erreurs -> TOUJOURS du JSON pour l'API.
+// Sans ca, Express renvoie une page HTML (text/html) et le front plante
+// sur r.json() avec "The string did not match the expected pattern".
+// ------------------------------------------------------------------
+app.use("/api", (err, req, res, next) => {
+  if (res.headersSent) return next(err);
+  const status = err.status || err.statusCode || 500;
+  let message;
+  if (err.type === "entity.too.large") message = "Contenu trop volumineux.";
+  else if (err.type === "entity.parse.failed") message = "Corps JSON invalide.";
+  else if (status >= 500) message = "Erreur interne du serveur.";
+  else message = err.message || "Requete invalide.";
+  res.status(status).json({ erreur: message });
+});
 
 app.listen(PORT, () => {
   console.log(`LM86 Services en ligne sur http://localhost:${PORT}`);

@@ -70,12 +70,34 @@
   }
 
   // ------------------------------------------------------------------
+  // lecture de reponse : on lit le texte puis on parse a la main, car
+  // r.json() sur une reponse non-JSON (HTML d'erreur, 413 proxied...)
+  // leve "The string did not match the expected pattern" sur Safari.
+  // ------------------------------------------------------------------
+  function lireReponse(r) {
+    return r.text().then(function (txt) {
+      var d = null;
+      try { d = JSON.parse(txt); } catch (e) { d = null; }
+      return { ok: r.ok, status: r.status, d: d };
+    });
+  }
+
+  function messageErreur(res, defaut) {
+    if (res.d && typeof res.d.erreur === "string") return res.d.erreur;
+    if (res.status === 401) return "Session expirée, reconnecte-toi.";
+    if (res.status === 413) return "Fichiers trop volumineux pour le serveur.";
+    if (res.status >= 500) return "Erreur serveur (HTTP " + res.status + ").";
+    if (res.status) return defaut + " (HTTP " + res.status + ")";
+    return defaut;
+  }
+
+  // ------------------------------------------------------------------
   // session
   // ------------------------------------------------------------------
   fetch("/api/session")
-    .then(function (r) { return r.json(); })
+    .then(lireReponse)
     .then(function (s) {
-      if (!s || !s.connecte) { window.location.href = "index.html"; return; }
+      if (!s.ok || !s.d || !s.d.connecte) { window.location.href = "index.html"; return; }
       charger();
     })
     .catch(function () { window.location.href = "index.html"; });
@@ -110,10 +132,14 @@
 
   function charger() {
     fetch("/api/content")
-      .then(function (r) { return r.json(); })
-      .then(function (d) {
-        contenuCourant = d;
-        construireFormulaire(d);
+      .then(lireReponse)
+      .then(function (res) {
+        if (!res.ok || !res.d) throw new Error(messageErreur(res, "Chargement impossible."));
+        contenuCourant = res.d;
+        construireFormulaire(res.d);
+      })
+      .catch(function (err) {
+        afficherStatut("Erreur : " + (err.message || "chargement impossible."), "erreur");
       });
   }
 
@@ -335,11 +361,12 @@
     fichiers.forEach(function (f) { donnees.append("image", f); });
 
     return fetch("/api/upload", { method: "POST", body: donnees })
-      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(lireReponse)
       .then(function (res) {
-        if (!res.ok) throw new Error(res.d.erreur || "Echec de l'envoi.");
+        if (!res.ok || !res.d) throw new Error(messageErreur(res, "Echec de l'envoi."));
         if (res.d.chemins && res.d.chemins.length) return res.d.chemins;
-        return [res.d.chemin];
+        if (res.d.chemin) return [res.d.chemin];
+        throw new Error("Echec de l'envoi.");
       });
   }
 
@@ -604,9 +631,9 @@
         donnees.append("image", fichier);
 
         fetch("/api/upload", { method: "POST", body: donnees })
-          .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+          .then(lireReponse)
           .then(function (res) {
-            if (!res.ok) throw new Error(res.d.erreur || "Echec de l'envoi.");
+            if (!res.ok || !res.d || !res.d.chemin) throw new Error(messageErreur(res, "Echec de l'envoi."));
             contenuCourant.images = contenuCourant.images || {};
             contenuCourant.images[slot.cle] = res.d.chemin;
             img.src = "/" + res.d.chemin + "?t=" + Date.now();
@@ -646,9 +673,9 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(nouveauContenu),
     })
-      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(lireReponse)
       .then(function (res) {
-        if (!res.ok) throw new Error(res.d.erreur || "Echec de l'enregistrement.");
+        if (!res.ok || !res.d) throw new Error(messageErreur(res, "Echec de l'enregistrement."));
         contenuCourant = res.d.contenu;
         if (!silencieux) afficherStatut("Modifications enregistrées ✓", "ok");
       })
