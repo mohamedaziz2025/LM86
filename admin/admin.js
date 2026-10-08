@@ -752,42 +752,6 @@
 
     galerie.forEach(ajouterItem);
 
-    // import en masse : toutes les photos choisies partent dans une seule fiche
-    var fichiersBulk = document.createElement("input");
-    fichiersBulk.type = "file";
-    fichiersBulk.accept = "image/*";
-    fichiersBulk.multiple = true;
-    fichiersBulk.style.display = "none";
-    wrapper.appendChild(fichiersBulk);
-
-    var boutonBulk = document.createElement("button");
-    boutonBulk.type = "button";
-    boutonBulk.className = "bouton-mini bouton-ajouter";
-    boutonBulk.textContent = "+ Ajouter plusieurs photos (nouvelle fiche)";
-    boutonBulk.addEventListener("click", function () { fichiersBulk.click(); });
-    wrapper.appendChild(boutonBulk);
-
-    fichiersBulk.addEventListener("change", function () {
-      var fichiers = Array.prototype.slice.call(fichiersBulk.files || []);
-      if (!fichiers.length) return;
-      var retenus = fichiers.slice(0, LIMITE_PHOTOS);
-      afficherStatut("Conversion en WebP + envoi de " + retenus.length + " photos...", "");
-      envoyerFichiers(retenus)
-        .then(function (chemins) {
-          ajouterItem({ images: chemins, categorie: "plomberie", titre: "", texte: "" });
-          fichiersBulk.value = "";
-          return enregistrerContenu(true);
-        })
-        .then(function () {
-          var msg = retenus.length + " photos ajoutées dans une nouvelle fiche ✓ (donne-lui un titre puis Enregistrer)";
-          if (fichiers.length > retenus.length) msg += " — " + (fichiers.length - retenus.length) + " ignorée(s)";
-          afficherStatut(msg, "ok");
-        })
-        .catch(function (err) {
-          afficherStatut("Erreur : " + (err.message || "echec de l'envoi."), "erreur");
-        });
-    });
-
     var boutonAjouter = document.createElement("button");
     boutonAjouter.type = "button";
     boutonAjouter.className = "bouton-mini bouton-ajouter";
