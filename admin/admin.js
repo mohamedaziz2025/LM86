@@ -85,7 +85,7 @@
   function messageErreur(res, defaut) {
     if (res.d && typeof res.d.erreur === "string") return res.d.erreur;
     if (res.status === 401) return "Session expirée, reconnecte-toi.";
-    if (res.status === 413) return "Fichiers trop volumineux pour le serveur.";
+    if (res.status === 413) return "Fichiers trop volumineux pour le serveur (HTTP 413).";
     if (res.status >= 500) return "Erreur serveur (HTTP " + res.status + ").";
     if (res.status) return defaut + " (HTTP " + res.status + ")";
     return defaut;
@@ -354,14 +354,19 @@
   }
 
   // ------------------------------------------------------------------
-  // envoi d'images — conversion en WebP avant envoi + decoupe auto
-  // en cas de 413 (proxy qui limite la taille du corps de requete)
+  // envoi d'images — conversion en WebP avant envoi + reessai automatique
+  // en cas de 413 (proxy qui limite la taille du corps de requete) :
+  // on decoupe le lot puis on recomprime plus fort en dernier recours.
   // ------------------------------------------------------------------
-  function versWebP(fichier) {
+  function versWebP(fichier, compact) {
     return new Promise(function (resolve) {
-      if (!fichier || !/^image\//.test(fichier.type) || fichier.type === "image/svg+xml" || fichier.type === "image/webp") {
+      if (!fichier || !/^image\//.test(fichier.type) || fichier.type === "image/svg+xml") {
         return resolve(fichier);
       }
+      if (fichier.type === "image/webp" && !compact) return resolve(fichier);
+
+      var max = compact ? 1280 : 1920;
+      var qualite = compact ? 0.62 : 0.82;
       var url = URL.createObjectURL(fichier);
       var img = new Image();
       var fini = false;
@@ -373,7 +378,6 @@
       }
       img.onload = function () {
         try {
-          var max = 1920;
           var l = img.naturalWidth || img.width;
           var h = img.naturalHeight || img.height;
           if (!l || !h) return terminer(fichier);
@@ -384,11 +388,11 @@
           cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
           cv.toBlob(function (blob) {
             if (!blob) return terminer(fichier);
-            if (blob.size >= fichier.size && /\.webp$/i.test(fichier.name)) return terminer(fichier);
+            if (!compact && blob.size >= fichier.size && /\.webp$/i.test(fichier.name)) return terminer(fichier);
             var ext = blob.type === "image/webp" ? ".webp" : ".jpg";
             var nom = fichier.name.replace(/\.[^.]+$/, "") + ext;
             terminer(new File([blob], nom, { type: blob.type, lastModified: Date.now() }));
-          }, "image/webp", 0.82);
+          }, "image/webp", qualite);
         } catch (e) {
           terminer(fichier);
         }
@@ -417,23 +421,34 @@
       });
   }
 
-  function envoyerEnLots(fichiers) {
+  function envoyerEnLots(fichiers, compact) {
     return envoyerUnLot(fichiers).catch(function (err) {
       if (!err.tropVolumineux) throw err;
-      if (fichiers.length <= 1) throw new Error("Fichier trop volumineux pour le serveur.");
-      // le proxy a refuse : on renvoie par moities jusqu'a passer
-      var milieu = Math.ceil(fichiers.length / 2);
-      return envoyerEnLots(fichiers.slice(0, milieu)).then(function (premiers) {
-        return envoyerEnLots(fichiers.slice(milieu)).then(function (autres) {
-          return premiers.concat(autres);
+      // 1) le lot est trop gros : on renvoie par moities jusqu'a passer
+      if (fichiers.length > 1) {
+        var milieu = Math.ceil(fichiers.length / 2);
+        return envoyerEnLots(fichiers.slice(0, milieu), compact).then(function (premiers) {
+          return envoyerEnLots(fichiers.slice(milieu), compact).then(function (autres) {
+            return premiers.concat(autres);
+          });
         });
-      });
+      }
+      // 2) meme une seule photo est refusee : on recomprime plus fort, une fois
+      if (!compact) {
+        return versWebP(fichiers[0], true).then(function (reduite) {
+          if (reduite === fichiers[0]) {
+            throw new Error("Photo trop volumineuse pour le serveur (HTTP 413).");
+          }
+          return envoyerEnLots([reduite], true);
+        });
+      }
+      throw new Error("Photo trop volumineuse pour le serveur (HTTP 413).");
     });
   }
 
   function envoyerFichiers(fichiers) {
-    return Promise.all(fichiers.map(versWebP)).then(function (prets) {
-      return envoyerEnLots(prets);
+    return Promise.all(fichiers.map(function (f) { return versWebP(f, false); })).then(function (prets) {
+      return envoyerEnLots(prets, false);
     });
   }
 

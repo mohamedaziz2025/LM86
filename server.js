@@ -186,7 +186,7 @@ const stockageUpload = multer.diskStorage({
 });
 const upload = multer({
   storage: stockageUpload,
-  limits: { fileSize: 8 * 1024 * 1024 }, // 8 Mo
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 Mo
   fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname || "").toLowerCase();
     if (file.mimetype.startsWith("image/") || extsAutoriseesUpload.includes(ext)) return cb(null, true);
@@ -199,7 +199,7 @@ const upload = multer({
 const MESSAGES_MULTER = {
   LIMIT_FILE_COUNT: "Trop de fichiers : 20 photos maximum par envoi.",
   LIMIT_UNEXPECTED_FILE: "Trop de fichiers : 20 photos maximum par envoi.",
-  LIMIT_FILE_SIZE: "Image trop volumineuse : 8 Mo maximum par photo.",
+  LIMIT_FILE_SIZE: "Image trop volumineuse : 10 Mo maximum par photo.",
   LIMIT_PART_COUNT: "Requete d'envoi invalide.",
   LIMIT_FIELD_COUNT: "Requete d'envoi invalide.",
   LIMIT_FIELD_VALUE: "Requete d'envoi invalide.",
