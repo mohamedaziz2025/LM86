@@ -22,6 +22,14 @@ const PORT = process.env.PORT || 3000;
 fs.mkdirSync(DOSSIER_SESSIONS, { recursive: true });
 fs.mkdirSync(DOSSIER_IMAGES, { recursive: true });
 
+// Le contenu reel (data/content.json) n'est versionne que par l'exemple
+// ci-dessous : un `git pull` ne doit jamais modifier les donnees du site.
+// Au tout premier demarrage, on part donc de la copie d'exemple.
+const FICHIER_CONTENU_EXEMPLE = path.join(RACINE, "data", "content.exemple.json");
+if (!fs.existsSync(FICHIER_CONTENU) && fs.existsSync(FICHIER_CONTENU_EXEMPLE)) {
+  fs.copyFileSync(FICHIER_CONTENU_EXEMPLE, FICHIER_CONTENU);
+}
+
 // ------------------------------------------------------------------
 // petites aides fichier
 // ------------------------------------------------------------------

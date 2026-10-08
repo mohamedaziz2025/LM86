@@ -6,3 +6,4 @@ data/sessions
 data/session-secret.txt
 .git
 *.log
+data/content.json

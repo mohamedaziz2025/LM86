@@ -3,5 +3,6 @@ node_modules/
 .env
 .env.production
 data/admin.json
+data/content.json
 data/sessions/
 data/session-secret.txt
